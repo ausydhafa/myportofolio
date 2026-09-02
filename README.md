@@ -1,4 +1,4 @@
-Nama : Ausy Dhafa
+Nama : Ausy Dhafa Adhitama
 
 NPM : 2406417954
 
