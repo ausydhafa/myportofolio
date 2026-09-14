@@ -25,34 +25,28 @@
         <section class="education" id="education">
             <div class="container">
                 <div class="section-heading">
-                    <p class="section-kicker">Education</p>
-                    <h2>My Education</h2>
+                    <p class="section-kicker">Pendidikan saya</p>
+                    <h1>Education</h1>
                 </div>
 
                 <div class="education-list">
-                    <article class="education-item">
-                        <div class="education-year">2024</div>
-                        <div class="education-content">
-                            <h3>SMAN 78 Jakarta</h3>
-                            <p>High School</p>
-                        </div>
-                    </article>
+                    {% for education in education_list %}
 
-                    <article class="education-item">
-                        <div class="education-year">2021</div>
-                        <div class="education-content">
-                            <h3>SMPN 2 Cilegon</h3>
-                            <p>Middle School</p>
-                        </div>
-                    </article>
+                        <article class="education-item">
+                            <div class="education-year">{{education.year}}</div>
+                            <div class="education-content">
+                                <h3>{{education.school}}</h3>
+                                <p>{{education.level}}</p>
+                            </div>
+                        </article>
 
-                    <article class="education-item">
-                        <div class="education-year">2018</div>
-                        <div class="education-content">
-                            <h3>SDN Bernas</h3>
-                            <p>Elementary School</p>
-                        </div>
-                    </article>
+                    {% empty %}
+
+                        <p class="empty-state">
+                            Belum ada data pendidikan yang ditambahkan.
+                        </p>
+
+                    {% endfor %}
                 </div>
             </div>
         </section>
