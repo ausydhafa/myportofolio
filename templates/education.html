@@ -1,61 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ name }} - Portfolio</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-</head>
-<body>
-    <header class="site-header">
-        <div class="container">
-            <a href="#profile" class="brand">{{ name }}</a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_experience' %}">Experience</a>
-                <a href="{% url 'main:show_education' %}">Education</a>
-            </nav>
-        </div>
-    </header>
-
+{% extends 'base.html' %}
+{% block content %}
     <main>
         <section class="education" id="education">
             <div class="container">
                 <div class="section-heading">
                     <p class="section-kicker">Pendidikan saya</p>
                     <h1>Education</h1>
+                    <a href="{% url 'main:create_education' %}"
+                       class="button education-add-button">
+                        <span aria-hidden="true">+</span>
+                        Tambah Riwayat Pendidikan
+                    </a>
+                </div>
+                <form method="get"
+                      action="{% url 'main:show_education' %}"
+                      class="education-search">
+                    <input type="search"
+                           name="school"
+                           value="{{ title_query }}"
+                           placeholder="Cari berdasarkan nama sekolah"
+                           class="education-search__input"
+                           aria-label="Cari berdasarkan nama sekolah">
+                    <button type="submit" class="button">Cari</button>
+                </form>
                 </div>
 
                 <div class="education-list">
                     {% for education in education_list %}
-
                         <article class="education-item">
                             <div class="education-year">{{education.year}}</div>
                             <div class="education-content">
                                 <h3>{{education.school}}</h3>
                                 <p>{{education.level}}</p>
                             </div>
+                            <div class="education-card-actions">
+                                <div class="education-actions">
+                                    {% if education.education_url %}
+                                        <a href="{{ education.education_url }}" class="button">Lihat Project</a>
+                                    {% endif %}
+                                    {% include "components/education_delete_modal.html" with education=education %}
+                                </div>
+                            </div>
                         </article>
 
                     {% empty %}
-
+                        {% if title_query %}
+                            <p class="empty-state">Tidak ada riwayat pendidikan dengan nama tersebut.</p>
+                        {% else %}
                         <p class="empty-state">
                             Belum ada data pendidikan yang ditambahkan.
                         </p>
-
+                        {% endif %}
                     {% endfor %}
                 </div>
             </div>
         </section>
     </main>
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
-        </div>
-    </footer>
-</body>
-</html>
+{% endblock content %}
