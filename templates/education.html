@@ -34,10 +34,13 @@
                                 <p>{{education.level}}</p>
                             </div>
                             <div class="education-card-actions">
-                                <div class="education-actions">
+                                <div class="education-actions">                                    
                                     {% if education.education_url %}
                                         <a href="{{ education.education_url }}" class="button">Lihat Project</a>
                                     {% endif %}
+
+                                    <a href="{% url 'main:update_education' education.id %}" class="button"> Edit</a>
+                                    
                                     {% include "components/education_delete_modal.html" with education=education %}
                                 </div>
                             </div>
