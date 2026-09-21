@@ -40,14 +40,14 @@
                                     {% endif %}
 
                                     <a href="{% url 'main:update_education' education.id %}" class="button"> Edit</a>
-                                    
+
                                     {% include "components/education_delete_modal.html" with education=education %}
                                 </div>
                             </div>
                         </article>
 
                     {% empty %}
-                        {% if title_query %}
+                        {% if school_query %}
                             <p class="empty-state">Tidak ada riwayat pendidikan dengan nama tersebut.</p>
                         {% else %}
                         <p class="empty-state">
