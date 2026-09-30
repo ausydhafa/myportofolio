@@ -6,11 +6,13 @@
                 <div class="section-heading">
                     <p class="section-kicker">Pendidikan saya</p>
                     <h1>Education</h1>
-                    <a href="{% url 'main:create_education' %}"
-                       class="button education-add-button">
-                        <span aria-hidden="true">+</span>
-                        Tambah Riwayat Pendidikan
-                    </a>
+                    {% if user.is_superuser %} 
+                        <a href="{% url 'main:create_education' %}"
+                        class="button education-add-button">
+                            <span aria-hidden="true">+</span>
+                            Tambah Riwayat Pendidikan
+                        </a>
+                    {% endif %}
                 </div>
                 <form method="get"
                       action="{% url 'main:show_education' %}"
@@ -41,7 +43,10 @@
 
                                     <a href="{% url 'main:update_education' education.id %}" class="button"> Edit</a>
 
-                                    {% include "components/education_delete_modal.html" with education=education %}
+                                    {% include "components/education_star.html" with education=education %}
+                                    {% if user.is_superuser %}
+                                        {% include "components/education_delete_modal.html" with education=education %}
+                                    {% endif %} 
                                 </div>
                             </div>
                         </article>
