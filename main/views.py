@@ -11,7 +11,8 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required  
 from django.core.exceptions import PermissionDenied  
-from django.http import JsonResponse      
+from django.http import JsonResponse    
+from django.views.decorators.http import require_POST  
 
 from main.forms import EducationForm, ProjectForm
 from main.models import Experience, Education, Project
@@ -184,20 +185,14 @@ def create_project(request):
     }
     return render(request, "projects_form.html", context)
 
-def show_projects(request):
-    json_response = get_projects_json(request)
 
-    projects = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    projects = [project.object for project in projects]
+def show_projects(request):
     title_query = request.GET.get("title", "").strip()
 
     context = {
         "name": "Ausy Dhafa Adhitama",
-        "project_list": projects,
         "title_query": title_query,
+        "form": ProjectForm(),
     }
     return render(request, "project.html", context)
 
@@ -255,3 +250,21 @@ def toggle_star(request, project_id):
             project.starred_by.add(request.user)
 
     return redirect("main:show_projects")
+
+@require_POST
+def create_project_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Hanya pemilik portofolio yang dapat menambahkan proyek."},
+            status=403,
+        )
+
+    form = ProjectForm(request.POST)
+    if form.is_valid():
+        project = form.save()
+        return JsonResponse(
+            {"message": "Proyek berhasil ditambahkan.", "pk": str(project.id)},
+            status=201,
+        )
+
+    return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
