@@ -24,3 +24,15 @@ Dalam pengerjaan tugas ini, saya menggunakan ChatGPT sebagai alat bantu untuk me
 
 #### AI Disclosure
 Dalam pengerjaan tugas ini, saya tidak menggunakan Generative AI sama sekali.
+
+### Tugas 5
+
+1. Debouncing digunakan untuk menunda request sampai pengguna berhenti mengetik sehingga jumlah request ke server dapat dikurangi.
+
+2. `await` digunakan untuk menunggu proses asynchronous seperti `fetch()` selesai sebelum hasilnya diproses.
+
+3. XSS adalah serangan ketika input pengguna dapat dieksekusi sebagai HTML atau JavaScript. Pada tugas ini, XSS dicegah dengan `strip_tags()` di server dan `escapeHtml()` ketika data JSON ditampilkan melalui JavaScript.
+
+#### AI Disclosure
+
+Dalam pengerjaan Tugas 5, saya menggunakan ChatGPT untuk membantu merangkum matei tutorial dan membantu memahami dan melakukan debugging pada implementasi AJAX, Fetch API, debouncing, CSRF, authorization, dan XSS. Hasil bantuan disesuaikan dengan struktur project dan diuji kembali pada aplikasi.
