@@ -17,6 +17,8 @@ from django.views.decorators.http import require_POST
 from main.forms import EducationForm, ProjectForm
 from main.models import Experience, Education, Project
 
+def is_editor(user):
+    return user.is_authenticated and user.groups.filter(name="Editor").exists()
 
 def show_main(request):
     last_login = request.COOKIES.get('last_login', 'Belum ada sesi login / Cookie tidak ditemukan')
@@ -54,6 +56,7 @@ def show_education(request):
         "name": "Ausy Dhafa Adhitama",
         "education_list": educations,
         "school_query": school_query,
+        "is_editor": is_editor(request.user),
     }
     return render(request, "education.html", context)
 
@@ -99,7 +102,10 @@ def delete_education(request, education_id):
 
     return redirect("main:show_education")
 
+@login_required(login_url="/login/")
 def update_education(request, education_id):
+    if not request.user.is_superuser and not is_editor(request.user):
+        raise PermissionDenied
     education = get_object_or_404(Education, pk=education_id)
 
     form = EducationForm(request.POST or None, instance=education)
@@ -154,16 +160,16 @@ def logout_user(request):
     return response
 
 @login_required(login_url="/login/")
+@require_POST
 def toggle_star(request, education_id):
     education = get_object_or_404(Education, pk=education_id)
 
-    if request.method == "POST":
         # Kalau akun ini sudah pernah memberi star, batalkan star-nya.
         # Kalau belum, tambahkan star.
-        if request.user in education.starred_by.all():
-            education.starred_by.remove(request.user)
-        else:
-            education.starred_by.add(request.user)
+    if request.user in education.starred_by.all():
+        education.starred_by.remove(request.user)
+    else:
+        education.starred_by.add(request.user)
 
     return redirect("main:show_education")
 
@@ -196,7 +202,11 @@ def show_projects(request):
     }
     return render(request, "project.html", context)
 
+@login_required(login_url="/login/")
 def delete_project(request, project_id):
+    if not request.user.is_superuser and not is_editor(request.user):
+        raise PermissionDenied
+    
     project = get_object_or_404(Project, pk=project_id)
 
     if request.method == "POST":
@@ -238,16 +248,16 @@ def get_projects_json(request):
 
 # Tanpa cek is_superuser: semua akun yang sudah login boleh memberi star
 @login_required(login_url="/login/")
+@require_POST
 def toggle_star(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
 
-    if request.method == "POST":
         # Kalau akun ini sudah pernah memberi star, batalkan star-nya.
         # Kalau belum, tambahkan star.
-        if request.user in project.starred_by.all():
-            project.starred_by.remove(request.user)
-        else:
-            project.starred_by.add(request.user)
+    if request.user in project.starred_by.all():
+        project.starred_by.remove(request.user)
+    else:
+        project.starred_by.add(request.user)
 
     return redirect("main:show_projects")
 

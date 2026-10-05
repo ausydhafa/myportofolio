@@ -41,10 +41,12 @@
                             <div class="education-card-actions">
                                 <div class="education-actions">                                    
                                     {% if education.education_url %}
-                                        <a href="{{ education.education_url }}" class="button">Lihat Project</a>
+                                        <a href="{{ education.education_url }}" class="button">Lihat Detail</a>
                                     {% endif %}
-
-                                    <a href="{% url 'main:update_education' education.id %}" class="button"> Edit</a>
+                                    
+                                    {% if user.is_superuser or is_editor %}
+                                        <a href="{% url 'main:update_education' education.id %}" class="button"> Edit</a>
+                                    {% endif %}
 
                                     {% include "components/education_star.html" with education=education %}
                                     {% if user.is_superuser %}

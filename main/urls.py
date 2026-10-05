@@ -27,10 +27,10 @@ urlpatterns = [
     path("register/", register, name="register"),
     path("login/", login_user, name="login"),
     path("logout/", logout_user, name="logout"),
-    path("education/<uuid:education_id>/star/", toggle_star, name="toggle_star",),
+    path("education/<uuid:education_id>/star/", toggle_star, name="toggle_education_star",),
     path("projects/add/", create_project, name="create_project"),
     path("projects/", show_projects, name="show_projects"),
     path("api/projects/", get_projects_json, name="get_projects_json"),
-    path("projects/<uuid:project_id>/star/", toggle_star,name="toggle_star",),
+    path("projects/<uuid:project_id>/star/", toggle_star,name="toggle_project_star",),
     path("projects/add-ajax/", create_project_ajax, name="create_project_ajax"),
 ]
