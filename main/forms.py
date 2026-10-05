@@ -38,6 +38,30 @@ class EducationForm(ModelForm):
                 }
             ),
         }
+        def clean_school(self):
+            school = strip_tags(
+                self.cleaned_data["school"]
+            ).strip()
+
+            if not school:
+                raise ValidationError(
+                    "Nama sekolah tidak boleh kosong."
+                )
+
+            return school
+
+
+        def clean_level(self):
+            level = strip_tags(
+                self.cleaned_data["level"]
+            ).strip()
+
+            if not level:
+                raise ValidationError(
+                    "Tingkat pendidikan tidak boleh kosong."
+                )
+
+            return level
 
 class ProjectForm(ModelForm):
     class Meta:
