@@ -6,67 +6,286 @@
                 <div class="section-heading">
                     <p class="section-kicker">Pendidikan saya</p>
                     <h1>Education</h1>
+
                     {% if user.is_superuser %} 
-                        <a href="{% url 'main:create_education' %}"
-                        class="button education-add-button">
+                        <button
+                            type="button"
+                            class="button education-add-button"
+                            popovertarget="add-education-modal">
+
                             <span aria-hidden="true">+</span>
                             Tambah Riwayat Pendidikan
-                        </a>
+
+                        </button>
                     {% endif %}
                 </div>
+
                 <button class="button button-secondary" onclick="showToast('Notifikasi Sistem', 'Education berhasil dimuat dengan baik!', 'success')">
                     Test Toast Notifikasi
                 </button>
-                <form method="get"
+
+                <formid="education-search-form"
+                      method="get"
                       action="{% url 'main:show_education' %}"
                       class="education-search">
-                    <input type="search"
+
+                    <input id="education-search-input"
+                           type="search"
                            name="school"
                            value="{{ school_query }}"
                            placeholder="Cari berdasarkan nama sekolah"
                            class="education-search__input"
                            aria-label="Cari berdasarkan nama sekolah">
+
                     <button type="submit" class="button">Cari</button>
                 </form>
                 </div>
 
                 <div class="education-list">
-                    {% for education in education_list %}
-                        <article class="education-item">
-                            <div class="education-year">{{education.year}}</div>
-                            <div class="education-content">
-                                <h3>{{education.school}}</h3>
-                                <p>{{education.level}}</p>
-                            </div>
-                            <div class="education-card-actions">
-                                <div class="education-actions">                                    
-                                    {% if education.education_url %}
-                                        <a href="{{ education.education_url }}" class="button">Lihat Detail</a>
-                                    {% endif %}
-                                    
-                                    {% if user.is_superuser or is_editor %}
-                                        <a href="{% url 'main:update_education' education.id %}" class="button"> Edit</a>
-                                    {% endif %}
+                    <!-- Loading state --> 
+                    <div id="education-loading" class="empty-state hide"> 
+                        <p>Memuat data pendidikan...</p> 
+                    </div> 
+                    
+                    <!-- Error state --> 
+                    <div id="education-error" class="empty-state hide"> 
+                        <p>Gagal memuat data pendidikan.</p> 
+                    </div> 
+                    
+                    <!-- Empty state --> 
+                    <div id="education-empty" class="empty-state hide"> 
+                        <p>Belum ada data pendidikan yang ditambahkan.</p> 
+                    </div> 
+                    
+                    <!-- Data Education --> 
+                    <div id="education-list" class="education-list hide"> 
 
-                                    {% include "components/education_star.html" with education=education %}
-                                    {% if user.is_superuser %}
-                                        {% include "components/education_delete_modal.html" with education=education %}
-                                    {% endif %} 
-                                </div>
-                            </div>
-                        </article>
-
-                    {% empty %}
-                        {% if school_query %}
-                            <p class="empty-state">Tidak ada riwayat pendidikan dengan nama tersebut.</p>
-                        {% else %}
-                        <p class="empty-state">
-                            Belum ada data pendidikan yang ditambahkan.
-                        </p>
-                        {% endif %}
-                    {% endfor %}
+                    </div>
                 </div>
             </div>
         </section>
-    </main>
+        </main>
+
+    <script>
+        const EDUCATION_ENDPOINT =
+            "{% url 'main:get_education_json' %}";
+
+        const educationLoading =
+            document.getElementById("education-loading");
+
+        const educationError =
+            document.getElementById("education-error");
+
+        const educationEmpty =
+            document.getElementById("education-empty");
+
+        const educationList =
+            document.getElementById("education-list");
+
+
+        function displayEducationSection({
+            showLoading = false,
+            showError = false,
+            showEmpty = false,
+            showEducationList = false
+        }) {
+            educationLoading.classList.toggle(
+                "hide",
+                !showLoading
+            );
+
+            educationError.classList.toggle(
+                "hide",
+                !showError
+            );
+
+            educationEmpty.classList.toggle(
+                "hide",
+                !showEmpty
+            );
+
+            educationList.classList.toggle(
+                "hide",
+                !showEducationList
+            );
+        }
+
+
+        function escapeHtml(value) {
+            return String(value ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+
+        function buildEducationCardElement(item) {
+            const education = item.fields;
+
+            const article =
+                document.createElement("article");
+
+            article.className = "education-item";
+
+            const starTitle =
+                education.star_count > 0
+                    ? `Dibintangi oleh ${escapeHtml(
+                        education.starred_by_names
+                    )}`
+                    : "Jadilah yang pertama memberi star";
+
+            article.innerHTML = `
+                <div class="education-year">
+                    ${escapeHtml(education.year)}
+                </div>
+
+                <div class="education-content">
+                    <h3>
+                        ${escapeHtml(education.school)}
+                    </h3>
+
+                    <p>
+                        ${escapeHtml(education.level)}
+                    </p>
+                </div>
+
+                <div class="education-card-actions">
+                    <div class="education-actions">
+
+                        ${
+                            education.education_url
+                                ? `
+                                    <a
+                                        href="${escapeHtml(
+                                            education.education_url
+                                        )}"
+                                        class="button">
+                                        Lihat Detail
+                                    </a>
+                                  `
+                                : ""
+                        }
+
+                        <button
+                            type="button"
+                            class="button"
+                            title="${starTitle}">
+                            ★
+                            ${education.star_count}
+                        </button>
+
+                    </div>
+                </div>
+            `;
+
+            return article;
+        }
+
+
+        async function fetchEducation(
+            searchQuery = ""
+        ) {
+            displayEducationSection({
+                showLoading: true
+            });
+
+            try {
+                const url = searchQuery
+                    ? `${EDUCATION_ENDPOINT}?school=${encodeURIComponent(
+                        searchQuery
+                    )}`
+                    : EDUCATION_ENDPOINT;
+
+                const response = await fetch(url, {
+                    headers: {
+                        "Accept": "application/json"
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(
+                        `HTTP ${response.status}`
+                    );
+                }
+
+                const educationData =
+                    await response.json();
+
+                educationList.innerHTML = "";
+
+                if (educationData.length === 0) {
+                    displayEducationSection({
+                        showEmpty: true
+                    });
+
+                    return;
+                }
+
+                educationData.forEach(item => {
+                    educationList.appendChild(
+                        buildEducationCardElement(item)
+                    );
+                });
+
+                displayEducationSection({
+                    showEducationList: true
+                });
+
+            } catch (error) {
+                console.error(
+                    "Error loading education:",
+                    error
+                );
+
+                displayEducationSection({
+                    showError: true
+                });
+            }
+        }
+
+
+        fetchEducation();
+
+        const searchForm =
+            document.getElementById(
+                "education-search-form"
+            );
+
+        const searchInput =
+            document.getElementById(
+                "education-search-input"
+            );
+
+        let searchDebounceTimer;
+
+        searchInput.addEventListener(
+            "input",
+            function () {
+                clearTimeout(searchDebounceTimer);
+
+                searchDebounceTimer =
+                    setTimeout(function () {
+                        fetchEducation(
+                            searchInput.value.trim()
+                        );
+                    }, 300);
+            }
+        );
+
+        searchForm.addEventListener(
+            "submit",
+            function (event) {
+                event.preventDefault();
+
+                clearTimeout(searchDebounceTimer);
+
+                fetchEducation(
+                    searchInput.value.trim()
+                );
+            }
+        );
+    </script>
+
 {% endblock content %}

@@ -1,6 +1,6 @@
 from django.urls import path
 
-from main.views import (create_project_ajax, get_projects_json, login_user, 
+from main.views import (create_education_ajax, create_project_ajax, get_projects_json, login_user, 
                         logout_user, 
                         register, 
                         show_main, 
@@ -33,4 +33,5 @@ urlpatterns = [
     path("api/projects/", get_projects_json, name="get_projects_json"),
     path("projects/<uuid:project_id>/star/", toggle_star,name="toggle_project_star",),
     path("projects/add-ajax/", create_project_ajax, name="create_project_ajax"),
+    path("education/add-ajax/", create_education_ajax, name="create_education_ajax",),
 ]
