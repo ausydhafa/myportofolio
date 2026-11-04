@@ -47,6 +47,7 @@ def show_education(request):
         "name": "Ausy Dhafa Adhitama",
         "form": EducationForm(),
         "is_editor": is_editor(request.user),
+        "school_query": request.GET.get("school", "").strip(),
     }
 
     return render(
@@ -78,7 +79,7 @@ def get_education_json(request):
     educations = Education.objects.prefetch_related('starred_by').all()
     
     if school_query:
-        educations = educations.filter(title__icontains=title_query)
+        educations = educations.filter(title__icontains=school_query)
 
     # Konstruksi data JSON secara manual agar bisa menyisipkan logika Star
     data = []
@@ -175,7 +176,7 @@ def logout_user(request):
 
 @login_required(login_url="/login/")
 @require_POST
-def toggle_star(request, education_id):
+def toggle_education_star(request, education_id):
     education = get_object_or_404(Education, pk=education_id)
 
         # Kalau akun ini sudah pernah memberi star, batalkan star-nya.
@@ -263,7 +264,7 @@ def get_projects_json(request):
 # Tanpa cek is_superuser: semua akun yang sudah login boleh memberi star
 @login_required(login_url="/login/")
 @require_POST
-def toggle_star(request, project_id):
+def toggle_project_star(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
 
         # Kalau akun ini sudah pernah memberi star, batalkan star-nya.
