@@ -45,18 +45,45 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'main',
+    'corsheaders',
     'rest_framework',
+    # TODO: Add DRF's built-in authtoken app
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    # TODO: Add corsheaders.middleware.CorsMiddleware before CommonMiddleware
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        # TODO: Enable TokenAuthentication alongside SessionAuthentication
+        #       so mobile clients use tokens while web pages keep using sessions
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}
+
+# Local development CORS settings for Flutter Web (Chrome)
+# Make sure to limit this on production, e.g.,
+# load CORS_ALLOW_ALL_ORIGINS value from .env set on the deployment environment
+# Allow all origins during local development.
+# Restrict this setting in production.
+CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "False" if PRODUCTION else "True").lower() == "true"
+
+CORS_ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+    if origin.strip()
 ]
 
 ROOT_URLCONF = 'portofolio.urls'
