@@ -79,7 +79,7 @@ def get_education_json(request):
     educations = Education.objects.prefetch_related('starred_by').all()
     
     if school_query:
-        educations = educations.filter(title__icontains=school_query)
+        educations = educations.filter(school__icontains=school_query)
 
     # Konstruksi data JSON secara manual agar bisa menyisipkan logika Star
     data = []
@@ -94,7 +94,7 @@ def get_education_json(request):
                 "school": education.school,
                 "year": education.year,
                 "level": education.level,
-                "education_url": education.education_url,
+                "education_image_url": education.educationz_image_url,
                 "star_count": starred_users.count(),
                 "is_starred": is_starred,
                 "starred_by_names": starred_by_names,

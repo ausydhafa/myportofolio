@@ -24,7 +24,7 @@
                     Test Toast Notifikasi
                 </button>
 
-                <formid="education-search-form"
+                <form id="education-search-form"
                       method="get"
                       action="{% url 'main:show_education' %}"
                       class="education-search">
@@ -64,7 +64,13 @@
                 </div>
             </div>
         </section>
-        </main>
+    </main>
+
+    {% if user.is_superuser %}
+        {% include "components/education_form_modal.html" %}
+    {% endif %}
+
+    {% csrf_token %}
 
     <script>
         const EDUCATION_ENDPOINT ="{% url 'main:get_education_json' %}";
@@ -128,9 +134,10 @@
 
         function buildEducationCardElement(item) {
             const education = item.fields;
+            const educationId = String(item.pk);
 
-            const article =
-                document.createElement("article");
+            const article = document.createElement("article");
+            article.className = "education-item";
 
             const editUrl =
                 "{% url 'main:update_education' '00000000-0000-0000-0000-000000000000' %}"
@@ -241,11 +248,11 @@
                         ${deleteHtml}
 
                         ${
-                            education.education_url
+                            education.education_image_url
                                 ? `
                                     <a
                                         href="${escapeHtml(
-                                            education.education_url
+                                            education.education_image_url
                                         )}"
                                         class="button">
                                         Lihat Detail
@@ -346,32 +353,27 @@
 
         let searchDebounceTimer;
 
-        searchInput.addEventListener(
-            "input",
-            function () {
+        if (searchInput) {
+            searchInput.addEventListener("input", function () {
                 clearTimeout(searchDebounceTimer);
 
-                searchDebounceTimer =
-                    setTimeout(function () {
-                        fetchEducation(
-                            searchInput.value.trim()
-                        );
-                    }, 300);
-            }
-        );
+                searchDebounceTimer = setTimeout(function () {
+                    fetchEducation(searchInput.value.trim());
+                }, 300);
+            });
+        }
 
-        searchForm.addEventListener(
-            "submit",
-            function (event) {
+        if (searchForm) {
+            searchForm.addEventListener("submit", function (event) {
                 event.preventDefault();
 
                 clearTimeout(searchDebounceTimer);
 
                 fetchEducation(
-                    searchInput.value.trim()
+                    searchInput ? searchInput.value.trim() : ""
                 );
-            }
-        );
+            });
+        }
 
             function getCookie(name) {
                 let cookieValue = null;
@@ -412,45 +414,38 @@
                 return cookieValue;
             }
 
-            const educationForm =
-                document.getElementById(
-                    "education-form"
-                );
+            
+            const educationForm = document.getElementById("education-form");
 
-            educationForm.addEventListener(
-                "submit",
-                async function (event) {
-                    event.preventDefault();
+            if (educationForm) {
+                educationForm.addEventListener("submit", async function (event) {
+                        event.preventDefault();
 
-                    const response =
-                        await fetch(
-                            educationForm.action,
-                            {
-                                method: "POST",
+                        const response =
+                            await fetch(
+                                educationForm.action,
+                                {
+                                    method: "POST",
 
-                                headers: {
-                                    "X-CSRFToken":
-                                        getCookie("csrftoken")
-                                },
+                                    headers: {
+                                        "X-CSRFToken":
+                                            getCookie("csrftoken")
+                                    },
 
-                                body:
-                                    new FormData(
-                                        educationForm
-                                    )
-                            }
-                        );
+                                    body:
+                                        new FormData(educationForm)
+                                }
+                            );
+                            
 
-                    const result =
-                        await response.json();
+                    const result = await response.json();
 
                     if (response.ok) {
                         educationForm.reset();
 
-                        document
-                            .getElementById(
-                                "add-education-modal"
-                            )
-                            .hidePopover();
+                        document.getElementById(
+                            "add-education-modal"
+                        )?.hidePopover();
 
                         showToast(
                             "Berhasil",
@@ -459,7 +454,7 @@
                         );
 
                         fetchEducation(
-                            searchInput.value.trim()
+                            searchInput ? searchInput.value.trim() : ""
                         );
 
                     } else {
@@ -485,6 +480,7 @@
                     }
                 }
             );
+            }
 
             </script>
 
